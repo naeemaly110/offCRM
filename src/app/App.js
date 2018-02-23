@@ -1,23 +1,29 @@
-import React, { Component } from 'react';
+import React from 'react';
 import Header from './components/header';
 import Body from './components/body';
 import Signin from './components/signin';
 import {firebase} from "./firebase";
 import "firebase/auth";
+import Loader from './components/loader';
 
-class App extends Component {
+class App extends React.Component {
 
   constructor(props){
     super(props);
 
     this.state = {
-      islogin: false
+      islogin: false,
+      isloading: true
     }
     this.checkForIsLogin = this.checkForIsLogin.bind(this);
+    this.userLogout = this.userLogout.bind(this);
+    this.startLoading = this.startLoading.bind(this);
+    this.stopLoading = this.stopLoading.bind(this);
   }
 
   componentWillMount(){
-    firebase.auth().onAuthStateChanged(function(user) {
+    firebase.auth().onAuthStateChanged((user) => {
+      this.startLoading();
       if (user) {
         this.setState({
           islogin: true
@@ -27,30 +33,56 @@ class App extends Component {
           islogin: false
         })
       }
+      this.stopLoading();
     });
+  }
+  
+  startLoading = () => {
+    this.setState({
+      isloading: true
+    })
+  }
+  stopLoading = () => {
+    this.setState({
+      isloading: false
+    })
   }
 
   checkForIsLogin = (email,pass) => {
+    this.startLoading();
     firebase.auth().signInWithEmailAndPassword(email, pass).catch(function(error) {
       
       var errorCode = error.code;
       var errorMessage = error.message;
       console.log(errorCode +'--'+ errorMessage);
     });
+    this.startLoading();
     
   }
   
+  userLogout = () => {
+    this.startLoading();
+    firebase.auth().signOut().then(function() {
+      this.setState({
+        islogin: false
+      })
+    }).catch(function(error) {
+      // An error happened.
+    });
+    this.stopLoading();
+  }
 
 
   render() {
     let show = null;
     if(this.state.islogin){
-      show = <div><Header/><Body/></div>;      
+      show = <div><Header userLogoutFunc={this.userLogout} /><Body/></div>;      
     } else {
       show = <Signin userSignin={this.checkForIsLogin} />;
     }
     return (
         <div>
+          <Loader isVisible = {this.state.isloading}/>
           {show}          
         </div>
     );

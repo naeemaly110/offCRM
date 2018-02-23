@@ -1,7 +1,7 @@
 import "./header.css";
 import React from "react";
 
-const Header = () => {
+const Header = (props) => {
   return (
     <div className="header">
        <nav className="navbar navbar-default">
@@ -18,7 +18,7 @@ const Header = () => {
 
     <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul className="nav navbar-nav navbar-right">
-        <li><a href="#">Link</a></li>
+        <li><button onClick={props.userLogoutFunc} >Logout</button></li>
         <li className="dropdown">
           <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span className="caret"></span></a>
           <ul className="dropdown-menu">
