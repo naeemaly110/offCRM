@@ -5,16 +5,14 @@ import Signin from './components/signin';
 import {firebase} from "./firebase";
 import "firebase/auth";
 import Loader from './components/loader';
+import {connect} from "react-redux";
 
 class App extends React.Component {
 
   constructor(props){
     super(props);
 
-    this.state = {
-      islogin: false,
-      isloading: true
-    }
+  
     this.checkForIsLogin = this.checkForIsLogin.bind(this);
     this.userLogout = this.userLogout.bind(this);
     this.startLoading = this.startLoading.bind(this);
@@ -56,7 +54,7 @@ class App extends React.Component {
       var errorMessage = error.message;
       console.log(errorCode +'--'+ errorMessage);
     });
-    this.startLoading();
+    this.stopLoading();
     
   }
   
@@ -75,18 +73,25 @@ class App extends React.Component {
 
   render() {
     let show = null;
-    if(this.state.islogin){
-      show = <div><Header userLogoutFunc={this.userLogout} /><Body/></div>;      
+    if(this.props.islogin){
+      show = <div><Header /*userLogoutFunc={this.userLogout}*/ /><Body/></div>;      
     } else {
-      show = <Signin userSignin={this.checkForIsLogin} />;
+      show = <Signin /*userSignin={this.checkForIsLogin}*/ />;
     }
     return (
         <div>
-          <Loader isVisible = {this.state.isloading}/>
+          <Loader isVisible = {false}/>
           {show}          
         </div>
     );
   }
 }
 
-export default App;
+const mapStateToProps = (state)=>{
+  
+  return {
+    islogin: state.userReducer.islogin
+  };
+};
+
+export default connect(mapStateToProps)(App);

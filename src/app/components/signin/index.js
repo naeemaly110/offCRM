@@ -1,5 +1,9 @@
 import "./signin.css";
 import React from "react";
+import { connect } from "react-redux";
+import {firebase} from "../../firebase";
+import "firebase/auth";
+import { loginUser } from "../../actions/userActions";
 
 class Signin extends React.Component {
   constructor(props){
@@ -16,9 +20,13 @@ class Signin extends React.Component {
 
   loginUser(e){
       e.preventDefault();
-      this.props.userSignin(this.state.email,this.state.pass);
-      //console.log(this.state.email + ' - ' + this.state.pass);
-  
+      
+      this.props.loginUser(
+        {
+          email: this.props.email,
+          pass : this.props.pass
+        }
+      );
     }
 
   setEmail(event){
@@ -32,7 +40,15 @@ class Signin extends React.Component {
       pass: event.target.value
     })
   }
-
+  componentWillMount(){
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        console.log(user);
+      }else{
+        console.log("notlogin");
+      }
+    });
+  }
 
 
   render(){
@@ -79,4 +95,20 @@ class Signin extends React.Component {
   }
 };
 
-export default Signin;
+const mapStateToProps = (state) =>{
+  //console.log(state);
+   return {
+     user: state.userReducer
+   };
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+      loginUser: (userinfo) => {
+          dispatch(loginUser(userinfo));
+      }
+    };
+}
+
+
+export default connect(mapStateToProps,mapDispatchToProps)(Signin);
