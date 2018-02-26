@@ -11,7 +11,8 @@ const userReducer = (state = {
                 ...state,
                 fname: action.payload.fname,
                 lname: action.payload.lname,
-                email: action.payload.email                
+                email: action.payload.email,
+                islogin: action.payload.islogin                                                
             };
             break;    
         default:

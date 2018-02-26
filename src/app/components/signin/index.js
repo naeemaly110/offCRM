@@ -3,6 +3,7 @@ import React from "react";
 import { connect } from "react-redux";
 import {firebase} from "../../firebase";
 import "firebase/auth";
+import "firebase/database";
 import { loginUser } from "../../actions/userActions";
 
 class Signin extends React.Component {
@@ -20,13 +21,20 @@ class Signin extends React.Component {
 
   loginUser(e){
       e.preventDefault();
+      let email = this.state.email;
+      let pass = this.state.pass;
+      firebase.auth().signInWithEmailAndPassword(email, pass).catch(function(error) {
       
-      this.props.loginUser(
-        {
-          email: this.props.email,
-          pass : this.props.pass
-        }
-      );
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        console.log(errorCode +'--'+ errorMessage);
+      });
+      // this.props.loginUser(
+      //   {
+      //     email: this.props.email,
+      //     pass : this.props.pass
+      //   }
+      // );
     }
 
   setEmail(event){
@@ -43,7 +51,33 @@ class Signin extends React.Component {
   componentWillMount(){
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        console.log(user);
+        //console.log(user.uid);
+        firebase.database().ref('/users/' + user.uid).once('value').then ((snapshot) => {
+          if(snapshot.val() !== null){
+             this.props.loginUser(
+                {
+                  email : snapshot.val().email,
+                  fname : snapshot.val().fname,
+                  lname : snapshot.val().lname,
+                  islogin : true
+                }
+              );
+          }else{
+            firebase.auth().signOut().then(function() {
+              this.props.loginUser(
+                {
+                  email : null,
+                  fname : null,
+                  lname : null,
+                  islogin : false
+                }
+              );
+            }).catch(function(error) {
+              // An error happened.
+            });
+          }
+        });
+        //console.log(user);
       }else{
         console.log("notlogin");
       }
